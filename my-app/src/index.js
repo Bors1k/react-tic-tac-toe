@@ -16,11 +16,8 @@ class Board extends React.Component {
       <Square
         key={i}
         value={this.props.squares[i]}
-        // row = {row}
-        // col = {col}
-        // value={i}
-        onClick={() => this.props.onClick(i)}
-        style={highlighted ? { color: 'rgb(0, 255, 136)' } : {}}
+        onClick={() => this.props.onClick(i, row, col)}
+        style={ highlighted ? { color: 'rgb(0, 255, 136)' } : {}}
       />
     );
   }
@@ -66,17 +63,21 @@ class Game extends React.Component {
     };
   }
 
-  handleClick(i) {
+  handleClick(i, row, col) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
+
     squares[i] = this.state.xIsNext ? 'X' : 'O';
+
     this.setState({
       history: history.concat([{
-        squares: squares
+        squares: squares,
+        row: row,
+        col: col
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext
@@ -103,7 +104,7 @@ class Game extends React.Component {
 
     const moves = history.map((step, move) => {
       const desc = move ?
-        'Перейти к шагу #' + move + '(' + this.props.row + ')' :
+        'Перейти к шагу #' + move + '(' + (step.row + 1) + ',' + (step.col + 1) + ')' :
         'Перейти к началу игры';
       return (
         <li key={move}>
@@ -133,12 +134,12 @@ class Game extends React.Component {
           <Board
             squares={current.squares}
             highlighted={winner}
-            onClick={(i) => this.handleClick(i)}
+            onClick={(i, row, col) => this.handleClick(i, row, col)}
           />
         </div>
         <div className="game-info">
-          <div><button onClick={()=> this.sortMovesList()}>Сортировка</button></div>
           <div>{status}</div>
+          <div><button onClick={() => this.sortMovesList()}>Сортировка</button></div>
           <ol>{moves}</ol>
         </div>
       </div>
