@@ -21,25 +21,29 @@ class Board extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+    const boardRow = (
+      <div className="board-row">
       </div>
     );
+    return (
+      <div>
+        {this.renderBoard(3,3)}
+      </div>
+    );
+  }
+  renderBoard(row,col) {
+    let board = Array(row).fill(null);
+    let index = 0;
+    for (let i = 0; i < row; i++) {
+      let cols = Array(col).fill(null)
+      for (let j = 0; j < col; j++) {
+        cols[j] = this.renderSquare(index);
+        index++;
+      }
+      index++;
+      board[i] = React.createElement('div',{className: 'board-row'},cols)
+    }
+    return board;
   }
 }
 
@@ -90,7 +94,7 @@ class Game extends React.Component {
         'Перейти к началу игры';
       return (
         <li key={move}>
-          <button onClick={() => {this.jumpTo(move)}}>{desc}</button>
+          <button onClick={() => { this.jumpTo(move) }}>{desc}</button>
         </li>
       );
     });
@@ -98,9 +102,8 @@ class Game extends React.Component {
     let status;
     if (winner) {
       status = 'Победитель: ' + winner;
-    } 
-    else if (this.state.stepNumber === 9)
-    {
+    }
+    else if (this.state.stepNumber === 9) {
       status = 'Ничья'
     }
     else {
