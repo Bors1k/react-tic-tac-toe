@@ -11,14 +11,16 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  renderSquare(i, highlighted = true) {
+  renderSquare(i, row, col, highlighted = true) {
     return (
       <Square
-        key = {i}
+        key={i}
         value={this.props.squares[i]}
+        // row = {row}
+        // col = {col}
         // value={i}
         onClick={() => this.props.onClick(i)}
-        style = { highlighted ? {color: 'rgb(0, 255, 136)'} : {}}
+        style={highlighted ? { color: 'rgb(0, 255, 136)' } : {}}
       />
     );
   }
@@ -26,26 +28,26 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        {this.renderBoard(3,3,this.props.highlighted)}
+        {this.renderBoard(3, 3, this.props.highlighted)}
       </div>
     );
   }
-  renderBoard(row,col, highlightSquares = null) {
+  renderBoard(row, col, highlightSquares = null) {
     let board = Array(row).fill(null);
     let index = 0;
     for (let i = 0; i < row; i++) {
       let cols = Array(col).fill(null)
       for (let j = 0; j < col; j++) {
-        if(highlightSquares!=null && highlightSquares.includes(index)){
-            cols[j] = this.renderSquare(index, true);
+        if (highlightSquares != null && highlightSquares.includes(index)) {
+          cols[j] = this.renderSquare(index, i, j, true);
         }
         else {
-          cols[j] = this.renderSquare(index, false);
+          cols[j] = this.renderSquare(index, i, j, false);
         }
         index++;
       }
 
-      board[i] = React.createElement('div',{className: 'board-row'},cols)
+      board[i] = React.createElement('div', { className: 'board-row' }, cols)
     }
     return board;
   }
@@ -60,6 +62,7 @@ class Game extends React.Component {
       }],
       xIsNext: true,
       stepNumber: 0,
+      sortMoves: false,
     };
   }
 
@@ -76,7 +79,7 @@ class Game extends React.Component {
         squares: squares
       }]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
+      xIsNext: !this.state.xIsNext
     });
   }
 
@@ -87,6 +90,12 @@ class Game extends React.Component {
     });
   }
 
+  sortMovesList() {
+    this.setState({
+      sortMoves: !this.state.sortMoves
+    });
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
@@ -94,14 +103,18 @@ class Game extends React.Component {
 
     const moves = history.map((step, move) => {
       const desc = move ?
-        'Перейти к шагу #' + move :
+        'Перейти к шагу #' + move + '(' + this.props.row + ')' :
         'Перейти к началу игры';
       return (
         <li key={move}>
-          <button onClick={() => { this.jumpTo(move) }} style={move == this.state.stepNumber ? {color: 'green'} : {}}>{desc}</button>
+          <button onClick={() => { this.jumpTo(move) }} style={move == this.state.stepNumber ? { color: 'green' } : {}}>{desc}</button>
         </li>
       );
     });
+
+    if (this.state.sortMoves) {
+      moves.sort((a, b) => b.key - a.key)
+    }
 
     let status;
     if (winner) {
@@ -119,11 +132,12 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={current.squares}
-            highlighted = {winner}
+            highlighted={winner}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
         <div className="game-info">
+          <div><button onClick={()=> this.sortMovesList()}>Сортировка</button></div>
           <div>{status}</div>
           <ol>{moves}</ol>
         </div>
